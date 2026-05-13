@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Premium de Nutrição e Saúde</title>
+
+  <style>
+    :root {
+      --bg: #050812;
+      --bg-soft: #0b1020;
+      --card: rgba(15, 23, 42, 0.88);
+      --card-2: rgba(2, 8, 23, 0.72);
+      --border: rgba(125, 249, 255, 0.22);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --cyan: #22d3ee;
+      --purple: #a855f7;
+      --green: #22c55e;
+      --yellow: #facc15;
+      --orange: #fb923c;
+      --red: #fb7185;
+      --shadow-cyan: 0 0 18px rgba(34, 211, 238, 0.45);
+      --shadow-purple: 0 0 18px rgba(168, 85, 247, 0.35);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(34, 211, 238, 0.22), transparent 34%),
+        radial-gradient(circle at top right, rgba(168, 85, 247, 0.2), transparent 32%),
+        linear-gradient(180deg, #020617 0%, var(--bg) 55%, #020617 100%);
+      color: var(--text);
+      padding: 18px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 540px;
+      margin: 0 auto;
+      padding-bottom: 28px;
+    }
+
+    .hero {
+      padding: 22px 4px 18px;
+    }
+
+    .tag {
+      width: fit-content;
+      padding: 7px 12px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(34, 211, 238, 0.35);
+      border-radius: 999px;
+      color: var(--cyan);
+      background: rgba(34, 211, 238, 0.08);
+      box-shadow: var(--shadow-cyan);
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 10vw, 3rem);
+      line-height: 0.98;
+      letter-spacing: -0.07em;
+      margin-bottom: 12px;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.55;
+    }
+
+    .dashboard {
+      position: sticky;
+      top: 10px;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .kpi {
+      position: relative;
+      overflow: hidden;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.94), rgba(2, 6, 23, 0.92));
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35), var(--shadow-cyan);
+    }
+
+    .kpi::before {
+      content: "";
+      position: absolute;
+      inset: -80px auto auto -70px;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: rgba(34, 211, 238, 0.16);
+      filter: blur(8px);
+    }
+
+    .kpi span,
+    .mini-kpi span,
+    .macro-card span,
+    .result-box span {
+      position: relative;
+      display: block;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .kpi strong {
+      position: relative;
+      display: block;
+      margin-top: 8px;
+      color: var(--cyan);
+      font-size: 2rem;
+      line-height: 1;
+      text-shadow: 0 0 14px rgba(34, 211, 238, 0.85);
+    }
+
+    .kpi small {
+      position: relative;
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .mini-kpi {
+      padding: 16px;
+      border: 1px solid rgba(168, 85, 247, 0.26);
+      border-radius: var(--radius);
+      background: rgba(15, 23, 42, 0.76);
+      box-shadow: var(--shadow-purple);
+    }
+
+    .mini-kpi strong {
+      display: block;
+      margin-top: 8px;
+      color: #d8b4fe;
+      font-size: 1.3rem;
+      text-shadow: 0 0 14px rgba(168, 85, 247, 0.7);
+    }
+
+    .progress-wrap {
+      margin-top: 12px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.18);
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--cyan), var(--purple), var(--green));
+      box-shadow: var(--shadow-cyan);
+      transition: width 0.3s ease;
+    }
+
+    .macro-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .macro-card {
+      padding: 14px 12px;
+      border: 1px solid rgba(125, 249, 255, 0.16);
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.72);
+      box-shadow: 0 14px 28px rgba(0,0,0,.24);
+    }
+
+    .macro-card strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 1.24rem;
+      letter-spacing: -0.04em;
+    }
+
+    .macro-card.protein strong { color: var(--green); text-shadow: 0 0 12px rgba(34,197,94,.55); }
+    .macro-card.carbs strong { color: var(--yellow); text-shadow: 0 0 12px rgba(250,204,21,.45); }
+    .macro-card.fat strong { color: var(--orange); text-shadow: 0 0 12px rgba(251,146,60,.45); }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 26px 2px 12px;
+    }
+
+    .section-title h2 {
+      font-size: 1.12rem;
+      letter-spacing: -0.03em;
+    }
+
+    .section-title small {
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .meal-card,
+    .imc-card,
+    .goal-card {
+      margin-bottom: 14px;
+      padding: 16px;
+      border: 1px solid rgba(125, 249, 255, 0.16);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, var(--card), var(--card-2));
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(16px);
+    }
+
+    .meal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .meal-head h3 {
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .meal-total {
+      min-width: fit-content;
+      padding: 7px 10px;
+      border: 1px solid rgba(34, 211, 238, 0.26);
+      border-radius: 999px;
+      color: var(--cyan);
+      background: rgba(34, 211, 238, 0.08);
+      font-size: 0.78rem;
+      font-weight: 800;
+      box-shadow: 0 0 10px rgba(34, 211, 238, 0.24);
+    }
+
+    .form-grid,
+    .goal-grid {
+      display: grid;
+      grid-template-columns: 1fr 90px;
+      gap: 10px;
+    }
+
+    .goal-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    input,
+    select {
+      width: 100%;
+      height: 46px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      border-radius: 15px;
+      outline: none;
+      background: rgba(2, 6, 23, 0.76);
+      color: var(--text);
+      padding: 0 13px;
+      font-size: 0.95rem;
+      transition: 0.22s ease;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: rgba(34, 211, 238, 0.7);
+      box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.1), var(--shadow-cyan);
+    }
+
+    option {
+      background: #020617;
+      color: var(--text);
+    }
+
+    .add-btn,
+    .clear-btn,
+    .calc-btn {
+      width: 100%;
+      min-height: 46px;
+      margin-top: 10px;
+      border: 0;
+      border-radius: 16px;
+      color: #031018;
+      background: linear-gradient(135deg, var(--cyan), #67e8f9, var(--green));
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      box-shadow: 0 0 22px rgba(34, 211, 238, 0.48);
+      cursor: pointer;
+      transition: transform 0.18s ease, filter 0.18s ease;
+    }
+
+    .add-btn:active,
+    .clear-btn:active,
+    .calc-btn:active,
+    .remove-btn:active {
+      transform: scale(0.97);
+    }
+
+    .clear-btn {
+      margin-top: 16px;
+      color: #fff;
+      background: linear-gradient(135deg, rgba(251, 113, 133, 0.95), rgba(168, 85, 247, 0.95));
+      box-shadow: 0 0 20px rgba(251, 113, 133, 0.28);
+    }
+
+    .food-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .food-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 11px;
+      border: 1px solid rgba(148, 163, 184, 0.13);
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.55);
+    }
+
+    .food-item strong {
+      display: block;
+      font-size: 0.9rem;
+    }
+
+    .food-item span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .remove-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(251, 113, 133, 0.35);
+      border-radius: 12px;
+      color: #fecdd3;
+      background: rgba(251, 113, 133, 0.1);
+      cursor: pointer;
+    }
+
+    .imc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .imc-result,
+    .result-box {
+      margin-top: 14px;
+      padding: 16px;
+      border: 1px solid rgba(34, 197, 94, 0.24);
+      border-radius: 18px;
+      background: rgba(34, 197, 94, 0.07);
+      box-shadow: 0 0 18px rgba(34, 197, 94, 0.18);
+    }
+
+    .result-box {
+      border-color: rgba(34, 211, 238, 0.28);
+      background: rgba(34, 211, 238, 0.06);
+      box-shadow: 0 0 18px rgba(34, 211, 238, 0.16);
+    }
+
+    .imc-result strong,
+    .result-box strong {
+      display: block;
+      margin-top: 6px;
+      color: var(--green);
+      font-size: 1.7rem;
+      text-shadow: 0 0 14px rgba(34, 197, 94, 0.58);
+    }
+
+    .result-box strong {
+      color: var(--cyan);
+      text-shadow: 0 0 14px rgba(34, 211, 238, 0.58);
+    }
+
+    .imc-result p,
+    .result-box p,
+    .result-box ul {
+      margin-top: 7px;
+      color: var(--text);
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .result-box ul {
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .pill-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .pill {
+      padding: 10px;
+      border-radius: 15px;
+      background: rgba(2, 6, 23, 0.58);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      text-align: center;
+    }
+
+    .pill b {
+      display: block;
+      color: var(--text);
+      font-size: .98rem;
+    }
+
+    .pill small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .tips {
+      margin-top: 18px;
+      padding: 16px;
+      border: 1px dashed rgba(168, 85, 247, 0.38);
+      border-radius: var(--radius);
+      color: var(--muted);
+      background: rgba(168, 85, 247, 0.06);
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    @media (min-width: 760px) {
+      body {
+        padding: 28px;
+      }
+
+      .app {
+        max-width: 1040px;
+      }
+
+      .grid-desktop {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .dashboard {
+        grid-template-columns: 1.4fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <div class="tag">Nutrição • Saúde • Mobile First</div>
+      <h1>Painel Premium de Nutrição e Saúde</h1>
+      <p>Registre refeições, acompanhe calorias e macronutrientes, calcule IMC e planeje metas de perda de peso ou ganho de massa magra com uma interface profissional.</p>
+    </header>
+
+    <section class="dashboard" aria-label="Resumo de calorias">
+      <div class="kpi">
+        <span>Total consumido hoje</span>
+        <strong id="totalCalories">0 kcal</strong>
+        <small>Atualização automática por refeição</small>
+        <div class="progress-wrap">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+
+      <div class="mini-kpi">
+        <span>Meta visual</span>
+        <strong id="goalLabel">2.000 kcal</strong>
+        <div class="progress-wrap">
+          <div class="progress-bar" id="goalBar"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="macro-grid" aria-label="Macronutrientes consumidos no dia">
+      <div class="macro-card protein">
+        <span>Proteína</span>
+        <strong id="totalProtein">0 g</strong>
+      </div>
+      <div class="macro-card carbs">
+        <span>Carboidratos</span>
+        <strong id="totalCarbs">0 g</strong>
+      </div>
+      <div class="macro-card fat">
+        <span>Gorduras</span>
+        <strong id="totalFat">0 g</strong>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <h2>Diário de Refeições Inteligente</h2>
+      <small>Escolha + porção</small>
+    </div>
+
+    <section class="grid-desktop" id="mealsContainer"></section>
+
+    <button class="clear-btn" id="clearDayBtn">Limpar diário do dia</button>
+
+    <div class="section-title">
+      <h2>Calculadora de IMC</h2>
+      <small>Cálculo automático</small>
+    </div>
+
+    <section class="imc-card">
+      <div class="imc-grid">
+        <div>
+          <label for="peso">Peso atual kg</label>
+          <input id="peso" type="number" inputmode="decimal" placeholder="Ex: 100" min="1" step="0.1" />
+        </div>
+
+        <div>
+          <label for="altura">Altura m</label>
+          <input id="altura" type="number" inputmode="decimal" placeholder="Ex: 1.80" min="0.5" step="0.01" />
+        </div>
+
+        <div class="full">
+          <label for="idade">Idade</label>
+          <input id="idade" type="number" inputmode="numeric" placeholder="Ex: 45" min="1" />
+        </div>
+      </div>
+
+      <div class="imc-result">
+        <span>Resultado do IMC</span>
+        <strong id="imcValue">--</strong>
+        <p id="imcClass">Informe peso e altura para calcular automaticamente.</p>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <h2>Calculadora de Meta Corporal</h2>
+      <small>Perder peso ou ganhar massa</small>
+    </div>
+
+    <section class="goal-card">
+      <div class="goal-grid">
+        <div>
+          <label for="sexo">Sexo</label>
+          <select id="sexo">
+            <option value="male">Masculino</option>
+            <option value="female">Feminino</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="atividade">Atividade</label>
+          <select id="atividade">
+            <option value="1.2">Sedentário</option>
+            <option value="1.375">Leve</option>
+            <option value="1.55" selected>Moderada</option>
+            <option value="1.725">Intensa</option>
+            <option value="1.9">Muito intensa</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="objetivo">Objetivo</label>
+          <select id="objetivo">
+            <option value="lose">Perder peso</option>
+            <option value="gain">Ganhar massa magra</option>
+            <option value="maintain">Manter peso</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="pesoMeta">Peso meta kg</label>
+          <input id="pesoMeta" type="number" inputmode="decimal" placeholder="Ex: 91" min="1" step="0.1" />
+        </div>
+
+        <div class="full">
+          <label for="dataMeta">Data da meta</label>
+          <input id="dataMeta" type="date" />
+        </div>
+      </div>
+
+      <button class="calc-btn" id="calculateGoalBtn">Calcular meta diária profissional</button>
+
+      <div class="result-box">
+        <span>Plano estimado</span>
+        <strong id="goalCalories">--</strong>
+        <p id="goalSummary">Preencha peso, altura, idade, objetivo, peso meta e data para gerar uma recomendação diária estimada.</p>
+
+        <div class="pill-row">
+          <div class="pill">
+            <b id="targetProtein">--</b>
+            <small>Proteína</small>
+          </div>
+          <div class="pill">
+            <b id="targetCarbs">--</b>
+            <small>Carbo</small>
+          </div>
+          <div class="pill">
+            <b id="targetFat">--</b>
+            <small>Gordura</small>
+          </div>
+        </div>
+
+        <ul id="goalDetails">
+          <li>O cálculo usa estimativa de gasto calórico diário e ajuste por objetivo.</li>
+          <li>Para perda de peso, o app limita o déficit para evitar metas muito agressivas.</li>
+          <li>Para ganho de massa, usa superávit moderado e maior ingestão proteica.</li>
+        </ul>
+      </div>
+    </section>
+
+    <aside class="tips">
+      <strong>Importante:</strong> as calorias e macronutrientes são estimativas por porção padrão. A calculadora oferece orientação geral e não substitui acompanhamento com nutricionista, principalmente em casos de doenças, uso de medicamentos ou metas muito rápidas.
+    </aside>
+  </main>
+
+  <script>
+    /*
+      BANCO DE DADOS DE ALIMENTOS COM MACRONUTRIENTES
+      ----------------------------------------------------
+      Para adicionar novos alimentos futuramente, basta criar uma nova linha
+      dentro do array foodDatabase seguindo este modelo:
+
+      {
+        name: "Nome do alimento",
+        calories: 123,
+        protein: 10,
+        carbs: 20,
+        fat: 5,
+        portion: "descrição da porção"
+      }
+
+      calories = calorias aproximadas da porção padrão.
+      protein = proteína em gramas da porção padrão.
+      carbs = carboidratos em gramas da porção padrão.
+      fat = gorduras em gramas da porção padrão.
+
+      O usuário poderá multiplicar essa porção pelo campo "Quantidade".
+    */
+
+    const foodDatabase = [
+      { name: "Arroz branco cozido", calories: 130, protein: 2.7, carbs: 28.2, fat: 0.3, portion: "100 g" },
+      { name: "Arroz integral cozido", calories: 124, protein: 2.6, carbs: 25.8, fat: 1.0, portion: "100 g" },
+      { name: "Feijão carioca cozido", calories: 76, protein: 4.8, carbs: 13.6, fat: 0.5, portion: "1 concha média" },
+      { name: "Feijão preto cozido", calories: 77, protein: 4.5, carbs: 14.0, fat: 0.5, portion: "1 concha média" },
+      { name: "Macarrão cozido", calories: 158, protein: 5.8, carbs: 30.9, fat: 0.9, portion: "100 g" },
+      { name: "Purê de batata", calories: 110, protein: 2.0, carbs: 18.0, fat: 4.0, portion: "100 g" },
+      { name: "Batata-doce cozida", calories: 86, protein: 1.6, carbs: 20.1, fat: 0.1, portion: "100 g" },
+      { name: "Batata inglesa cozida", calories: 52, protein: 1.2, carbs: 11.9, fat: 0.1, portion: "100 g" },
+      { name: "Mandioca cozida", calories: 125, protein: 1.0, carbs: 30.0, fat: 0.3, portion: "100 g" },
+      { name: "Farofa", calories: 170, protein: 2.0, carbs: 24.0, fat: 8.0, portion: "2 colheres de sopa" },
+      { name: "Cuscuz nordestino", calories: 113, protein: 2.2, carbs: 25.0, fat: 0.7, portion: "1 fatia média / 100 g" },
+      { name: "Tapioca simples", calories: 160, protein: 0.3, carbs: 39.0, fat: 0.2, portion: "1 unidade média" },
+      { name: "Tapioca com queijo", calories: 280, protein: 9.0, carbs: 40.0, fat: 9.0, portion: "1 unidade média" },
+      { name: "Pão francês", calories: 135, protein: 4.5, carbs: 27.0, fat: 1.5, portion: "1 unidade" },
+      { name: "Pão integral", calories: 70, protein: 3.0, carbs: 12.0, fat: 1.2, portion: "1 fatia" },
+      { name: "Aveia", calories: 117, protein: 4.2, carbs: 20.0, fat: 2.2, portion: "3 colheres de sopa" },
+      { name: "Granola", calories: 120, protein: 2.5, carbs: 20.0, fat: 3.8, portion: "30 g" },
+      { name: "Ovo cozido", calories: 78, protein: 6.3, carbs: 0.6, fat: 5.3, portion: "1 unidade" },
+      { name: "Ovo mexido", calories: 110, protein: 7.0, carbs: 0.8, fat: 8.5, portion: "1 unidade com óleo" },
+      { name: "Frango grelhado", calories: 165, protein: 31.0, carbs: 0.0, fat: 3.6, portion: "100 g" },
+      { name: "Carne bovina magra", calories: 215, protein: 26.0, carbs: 0.0, fat: 12.0, portion: "100 g" },
+      { name: "Carne de sol", calories: 240, protein: 27.0, carbs: 0.0, fat: 14.0, portion: "100 g" },
+      { name: "Peixe grelhado", calories: 140, protein: 26.0, carbs: 0.0, fat: 4.0, portion: "100 g" },
+      { name: "Atum em água", calories: 90, protein: 20.0, carbs: 0.0, fat: 1.0, portion: "1/2 lata" },
+      { name: "Sardinha", calories: 180, protein: 22.0, carbs: 0.0, fat: 10.0, portion: "1 lata pequena" },
+      { name: "Queijo coalho", calories: 110, protein: 7.0, carbs: 1.0, fat: 9.0, portion: "1 espeto pequeno / 30 g" },
+      { name: "Queijo minas", calories: 80, protein: 5.0, carbs: 1.0, fat: 6.0, portion: "1 fatia média" },
+      { name: "Requeijão", calories: 75, protein: 2.0, carbs: 1.0, fat: 7.0, portion: "1 colher de sopa" },
+      { name: "Iogurte natural", calories: 120, protein: 6.0, carbs: 12.0, fat: 5.0, portion: "1 pote" },
+      { name: "Leite integral", calories: 122, protein: 6.4, carbs: 9.6, fat: 6.6, portion: "1 copo / 200 ml" },
+      { name: "Leite desnatado", calories: 70, protein: 6.8, carbs: 10.0, fat: 0.4, portion: "1 copo / 200 ml" },
+      { name: "Café sem açúcar", calories: 2, protein: 0.1, carbs: 0.0, fat: 0.0, portion: "1 xícara" },
+      { name: "Café com açúcar", calories: 35, protein: 0.1, carbs: 8.5, fat: 0.0, portion: "1 xícara" },
+      { name: "Suco de laranja", calories: 110, protein: 1.5, carbs: 25.0, fat: 0.3, portion: "1 copo / 200 ml" },
+      { name: "Cajuína", calories: 85, protein: 0.2, carbs: 21.0, fat: 0.0, portion: "1 copo / 200 ml" },
+      { name: "Água de coco", calories: 44, protein: 0.4, carbs: 10.4, fat: 0.0, portion: "1 copo / 200 ml" },
+      { name: "Banana", calories: 90, protein: 1.1, carbs: 23.0, fat: 0.3, portion: "1 unidade média" },
+      { name: "Maçã", calories: 72, protein: 0.4, carbs: 19.0, fat: 0.2, portion: "1 unidade média" },
+      { name: "Mamão", calories: 60, protein: 0.6, carbs: 15.0, fat: 0.2, portion: "1 fatia média" },
+      { name: "Manga", calories: 100, protein: 0.8, carbs: 25.0, fat: 0.4, portion: "1/2 unidade" },
+      { name: "Abacaxi", calories: 50, protein: 0.5, carbs: 13.0, fat: 0.1, portion: "1 fatia" },
+      { name: "Melancia", calories: 46, protein: 0.9, carbs: 11.5, fat: 0.2, portion: "1 fatia média" },
+      { name: "Caju", calories: 37, protein: 0.9, carbs: 9.0, fat: 0.2, portion: "1 unidade" },
+      { name: "Castanha de caju", calories: 165, protein: 5.0, carbs: 9.0, fat: 13.0, portion: "30 g" },
+      { name: "Amendoim", calories: 170, protein: 7.5, carbs: 5.0, fat: 14.0, portion: "30 g" },
+      { name: "Salada verde", calories: 25, protein: 1.5, carbs: 4.0, fat: 0.3, portion: "1 prato pequeno" },
+      { name: "Tomate", calories: 22, protein: 1.1, carbs: 4.8, fat: 0.2, portion: "1 unidade média" },
+      { name: "Cenoura cozida", calories: 35, protein: 0.8, carbs: 8.0, fat: 0.2, portion: "100 g" },
+      { name: "Brócolis cozido", calories: 35, protein: 2.4, carbs: 7.2, fat: 0.4, portion: "100 g" },
+      { name: "Azeite de oliva", calories: 90, protein: 0.0, carbs: 0.0, fat: 10.0, portion: "1 colher de sopa" },
+      { name: "Sopa de legumes", calories: 120, protein: 4.0, carbs: 18.0, fat: 3.0, portion: "1 prato fundo" },
+      { name: "Pizza", calories: 285, protein: 12.0, carbs: 33.0, fat: 12.0, portion: "1 fatia média" },
+      { name: "Hambúrguer simples", calories: 350, protein: 18.0, carbs: 35.0, fat: 16.0, portion: "1 unidade" },
+      { name: "Coxinha", calories: 280, protein: 9.0, carbs: 30.0, fat: 14.0, portion: "1 unidade média" },
+      { name: "Pastel de carne", calories: 310, protein: 11.0, carbs: 28.0, fat: 17.0, portion: "1 unidade média" },
+      { name: "Bolo simples", calories: 220, protein: 4.0, carbs: 35.0, fat: 8.0, portion: "1 fatia" },
+      { name: "Biscoito recheado", calories: 140, protein: 2.0, carbs: 22.0, fat: 5.0, portion: "3 unidades" },
+      { name: "Chocolate", calories: 135, protein: 2.0, carbs: 15.0, fat: 8.0, portion: "25 g" },
+      { name: "Açaí com granola", calories: 350, protein: 6.0, carbs: 62.0, fat: 9.0, portion: "1 tigela pequena" },
+      { name: "Canjica", calories: 210, protein: 5.0, carbs: 36.0, fat: 5.0, portion: "1 copo pequeno" },
+      { name: "Baião de dois", calories: 250, protein: 10.0, carbs: 34.0, fat: 8.0, portion: "1 porção / 150 g" },
+      { name: "Panelada", calories: 320, protein: 22.0, carbs: 8.0, fat: 22.0, portion: "1 prato médio" },
+      { name: "Peixada", calories: 290, protein: 28.0, carbs: 16.0, fat: 12.0, portion: "1 prato médio" },
+      { name: "Caldo de carne", calories: 180, protein: 14.0, carbs: 12.0, fat: 8.0, portion: "1 tigela" },
+      { name: "Vitamina de banana", calories: 220, protein: 7.0, carbs: 40.0, fat: 4.0, portion: "1 copo / 250 ml" }
+    ];
+
+    const meals = [
+      { id: "cafe", title: "Café da manhã" },
+      { id: "lancheManha", title: "Lanche da manhã" },
+      { id: "almoco", title: "Almoço" },
+      { id: "lancheTarde", title: "Lanche da tarde" },
+      { id: "jantar", title: "Jantar" },
+      { id: "ceia", title: "Ceia" }
+    ];
+
+    let dailyGoal = 2000;
+    const mealData = {};
+
+    const mealsContainer = document.getElementById("mealsContainer");
+    const totalCaloriesElement = document.getElementById("totalCalories");
+    const totalProteinElement = document.getElementById("totalProtein");
+    const totalCarbsElement = document.getElementById("totalCarbs");
+    const totalFatElement = document.getElementById("totalFat");
+    const progressBar = document.getElementById("progressBar");
+    const goalBar = document.getElementById("goalBar");
+    const goalLabel = document.getElementById("goalLabel");
+    const clearDayBtn = document.getElementById("clearDayBtn");
+
+    const pesoInput = document.getElementById("peso");
+    const alturaInput = document.getElementById("altura");
+    const idadeInput = document.getElementById("idade");
+    const imcValue = document.getElementById("imcValue");
+    const imcClass = document.getElementById("imcClass");
+
+    const sexoInput = document.getElementById("sexo");
+    const atividadeInput = document.getElementById("atividade");
+    const objetivoInput = document.getElementById("objetivo");
+    const pesoMetaInput = document.getElementById("pesoMeta");
+    const dataMetaInput = document.getElementById("dataMeta");
+    const calculateGoalBtn = document.getElementById("calculateGoalBtn");
+    const goalCalories = document.getElementById("goalCalories");
+    const goalSummary = document.getElementById("goalSummary");
+    const goalDetails = document.getElementById("goalDetails");
+    const targetProtein = document.getElementById("targetProtein");
+    const targetCarbs = document.getElementById("targetCarbs");
+    const targetFat = document.getElementById("targetFat");
+
+    function createFoodOptions() {
+      return foodDatabase
+        .map((food, index) => `<option value="${index}">${food.name} • ${food.calories} kcal • ${food.portion}</option>`)
+        .join("");
+    }
+
+    function renderMeals() {
+      mealsContainer.innerHTML = "";
+
+      meals.forEach((meal) => {
+        mealData[meal.id] = [];
+
+        const card = document.createElement("article");
+        card.className = "meal-card";
+        card.innerHTML = `
+          <div class="meal-head">
+            <h3>${meal.title}</h3>
+            <div class="meal-total" id="${meal.id}-total">0 kcal</div>
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <label for="${meal.id}-food">Alimento</label>
+              <select id="${meal.id}-food">
+                ${createFoodOptions()}
+              </select>
+            </div>
+
+            <div>
+              <label for="${meal.id}-qty">Qtd.</label>
+              <input id="${meal.id}-qty" type="number" inputmode="decimal" min="0.25" step="0.25" value="1" />
+            </div>
+          </div>
+
+          <button class="add-btn" data-meal="${meal.id}">Adicionar alimento</button>
+          <div class="food-list" id="${meal.id}-list">
+            <p class="empty">Nenhum alimento lançado ainda.</p>
+          </div>
+        `;
+
+        mealsContainer.appendChild(card);
+      });
+    }
+
+    function addFoodToMeal(mealId) {
+      const foodSelect = document.getElementById(`${mealId}-food`);
+      const qtyInput = document.getElementById(`${mealId}-qty`);
+
+      const selectedFood = foodDatabase[Number(foodSelect.value)];
+      const quantity = Number(qtyInput.value) || 1;
+
+      mealData[mealId].push({
+        name: selectedFood.name,
+        portion: selectedFood.portion,
+        baseCalories: selectedFood.calories,
+        quantity,
+        totalCalories: Math.round(selectedFood.calories * quantity),
+        totalProtein: roundMacro(selectedFood.protein * quantity),
+        totalCarbs: roundMacro(selectedFood.carbs * quantity),
+        totalFat: roundMacro(selectedFood.fat * quantity)
+      });
+
+      qtyInput.value = 1;
+      updateMealList(mealId);
+      updateDashboard();
+    }
+
+    function removeFoodFromMeal(mealId, index) {
+      mealData[mealId].splice(index, 1);
+      updateMealList(mealId);
+      updateDashboard();
+    }
+
+    function updateMealList(mealId) {
+      const list = document.getElementById(`${mealId}-list`);
+      const mealTotal = document.getElementById(`${mealId}-total`);
+      const foods = mealData[mealId];
+
+      if (foods.length === 0) {
+        list.innerHTML = `<p class="empty">Nenhum alimento lançado ainda.</p>`;
+        mealTotal.textContent = "0 kcal";
+        return;
+      }
+
+      const total = foods.reduce((sum, item) => sum + item.totalCalories, 0);
+      mealTotal.textContent = `${total} kcal`;
+
+      list.innerHTML = foods
+        .map((item, index) => `
+          <div class="food-item">
+            <div>
+              <strong>${item.name}</strong>
+              <span>${item.quantity}x porção • ${item.portion} • ${item.totalCalories} kcal<br>
+              P: ${item.totalProtein}g • C: ${item.totalCarbs}g • G: ${item.totalFat}g</span>
+            </div>
+            <button class="remove-btn" onclick="removeFoodFromMeal('${mealId}', ${index})" aria-label="Remover ${item.name}">×</button>
+          </div>
+        `)
+        .join("");
+    }
+
+    function roundMacro(value) {
+      return Math.round(value * 10) / 10;
+    }
+
+    function updateDashboard() {
+      const allFoods = Object.values(mealData).flat();
+
+      const total = allFoods.reduce((sum, item) => sum + item.totalCalories, 0);
+      const protein = roundMacro(allFoods.reduce((sum, item) => sum + item.totalProtein, 0));
+      const carbs = roundMacro(allFoods.reduce((sum, item) => sum + item.totalCarbs, 0));
+      const fat = roundMacro(allFoods.reduce((sum, item) => sum + item.totalFat, 0));
+
+      totalCaloriesElement.textContent = `${total} kcal`;
+      totalProteinElement.textContent = `${protein} g`;
+      totalCarbsElement.textContent = `${carbs} g`;
+      totalFatElement.textContent = `${fat} g`;
+
+      goalLabel.textContent = `${dailyGoal} kcal`;
+      const progress = Math.min((total / dailyGoal) * 100, 100);
+      progressBar.style.width = `${progress}%`;
+      goalBar.style.width = `${progress}%`;
+    }
+
+    function calculateIMC() {
+      const peso = Number(pesoInput.value);
+      const altura = Number(alturaInput.value);
+      const idade = Number(idadeInput.value);
+
+      if (!peso || !altura || altura <= 0) {
+        imcValue.textContent = "--";
+        imcClass.textContent = "Informe peso e altura para calcular automaticamente.";
+        return;
+      }
+
+      const imc = peso / (altura * altura);
+      const imcRounded = imc.toFixed(1);
+      let classification = "";
+      let message = "";
+
+      if (imc < 18.5) {
+        classification = "Abaixo do peso";
+        message = "Seu IMC está abaixo da faixa considerada normal.";
+      } else if (imc < 25) {
+        classification = "Peso normal";
+        message = "Seu IMC está dentro da faixa considerada normal.";
+      } else if (imc < 30) {
+        classification = "Sobrepeso";
+        message = "Seu IMC indica sobrepeso. Ajustes de rotina podem ajudar.";
+      } else if (imc < 35) {
+        classification = "Obesidade grau I";
+        message = "Seu IMC indica obesidade grau I. Vale acompanhar com profissional de saúde.";
+      } else if (imc < 40) {
+        classification = "Obesidade grau II";
+        message = "Seu IMC indica obesidade grau II. Busque orientação profissional.";
+      } else {
+        classification = "Obesidade grau III";
+        message = "Seu IMC indica obesidade grau III. É recomendado acompanhamento profissional.";
+      }
+
+      imcValue.textContent = `${imcRounded} • ${classification}`;
+      imcClass.textContent = idade
+        ? `${message} Idade registrada: ${idade} anos.`
+        : message;
+    }
+
+    function calculateGoal() {
+      const peso = Number(pesoInput.value);
+      const alturaM = Number(alturaInput.value);
+      const idade = Number(idadeInput.value);
+      const sexo = sexoInput.value;
+      const atividade = Number(atividadeInput.value);
+      const objetivo = objetivoInput.value;
+      const pesoMeta = Number(pesoMetaInput.value);
+      const dataMeta = dataMetaInput.value;
+
+      if (!peso || !alturaM || !idade || !pesoMeta || !dataMeta) {
+        goalCalories.textContent = "--";
+        goalSummary.textContent = "Preencha peso atual, altura, idade, peso meta e data da meta para calcular.";
+        return;
+      }
+
+      const hoje = new Date();
+      const meta = new Date(`${dataMeta}T12:00:00`);
+      const dias = Math.ceil((meta - hoje) / (1000 * 60 * 60 * 24));
+
+      if (dias <= 0) {
+        goalCalories.textContent = "Data inválida";
+        goalSummary.textContent = "Escolha uma data futura para calcular a meta diária.";
+        return;
+      }
+
+      const alturaCm = alturaM * 100;
+
+      // Fórmula de Mifflin-St Jeor para estimar Taxa Metabólica Basal.
+      const bmr = sexo === "male"
+        ? (10 * peso) + (6.25 * alturaCm) - (5 * idade) + 5
+        : (10 * peso) + (6.25 * alturaCm) - (5 * idade) - 161;
+
+      const tdee = Math.round(bmr * atividade); // gasto calórico diário estimado
+      const kgDifference = pesoMeta - peso;
+      const totalCaloriesToChange = Math.abs(kgDifference) * 7700; // estimativa média: 1 kg de gordura ≈ 7700 kcal
+      const dailyAdjustment = Math.round(totalCaloriesToChange / dias);
+
+      let recommendedCalories = tdee;
+      let status = "";
+      let warning = "";
+
+      if (objetivo === "lose") {
+        const safeDeficit = Math.min(dailyAdjustment, 750);
+        recommendedCalories = Math.round(tdee - safeDeficit);
+        status = `Para perder aproximadamente ${Math.abs(kgDifference).toFixed(1)} kg em ${dias} dias, o déficit estimado seria de ${dailyAdjustment} kcal/dia.`;
+
+        if (kgDifference >= 0) {
+          warning = "Atenção: seu peso meta está maior ou igual ao peso atual. Para perder peso, informe um peso meta menor.";
+        } else if (dailyAdjustment > 750) {
+          warning = "Meta agressiva: o app limitou o déficit a 750 kcal/dia para uma estimativa mais prudente.";
+        } else {
+          warning = "Meta dentro de uma faixa mais moderada, considerando a estimativa utilizada.";
+        }
+      }
+
+      if (objetivo === "gain") {
+        const surplus = Math.min(Math.max(dailyAdjustment, 200), 400);
+        recommendedCalories = Math.round(tdee + surplus);
+        status = `Para ganhar aproximadamente ${Math.abs(kgDifference).toFixed(1)} kg em ${dias} dias, o app usa superávit moderado de ${surplus} kcal/dia.`;
+
+        if (kgDifference <= 0) {
+          warning = "Atenção: seu peso meta está menor ou igual ao peso atual. Para ganhar massa, informe um peso meta maior.";
+        } else {
+          warning = "Para ganho de massa magra, combine superávit calórico, musculação e proteína adequada.";
+        }
+      }
+
+      if (objetivo === "maintain") {
+        recommendedCalories = tdee;
+        status = `Para manutenção, o foco é consumir próximo ao seu gasto calórico diário estimado.`;
+        warning = "Use a meta como ponto de partida e ajuste conforme evolução do peso e medidas.";
+      }
+
+      // Proteína: maior em perda de peso e ganho de massa; moderada em manutenção.
+      const proteinPerKg = objetivo === "maintain" ? 1.6 : 2.0;
+      const proteinG = Math.round(peso * proteinPerKg);
+
+      // Gorduras: cerca de 25% das calorias totais.
+      const fatG = Math.round((recommendedCalories * 0.25) / 9);
+
+      // Carboidratos: calorias restantes depois de proteína e gordura.
+      const carbsG = Math.max(0, Math.round((recommendedCalories - (proteinG * 4) - (fatG * 9)) / 4));
+
+      dailyGoal = recommendedCalories;
+      updateDashboard();
+
+      goalCalories.textContent = `${recommendedCalories} kcal/dia`;
+      goalSummary.textContent = `${status} Seu gasto diário estimado é de ${tdee} kcal. ${warning}`;
+      targetProtein.textContent = `${proteinG}g`;
+      targetCarbs.textContent = `${carbsG}g`;
+      targetFat.textContent = `${fatG}g`;
+
+      goalDetails.innerHTML = `
+        <li>Taxa metabólica basal estimada: <strong>${Math.round(bmr)} kcal</strong>.</li>
+        <li>Gasto calórico diário estimado com atividade: <strong>${tdee} kcal</strong>.</li>
+        <li>Diferença até a meta: <strong>${kgDifference.toFixed(1)} kg</strong> em <strong>${dias} dias</strong>.</li>
+        <li>Macros sugeridos: <strong>${proteinG}g proteína</strong>, <strong>${carbsG}g carboidratos</strong> e <strong>${fatG}g gorduras</strong>.</li>
+      `;
+    }
+
+    function clearDay() {
+      meals.forEach((meal) => {
+        mealData[meal.id] = [];
+        updateMealList(meal.id);
+      });
+      updateDashboard();
+    }
+
+    renderMeals();
+    updateDashboard();
+
+    document.querySelectorAll(".add-btn").forEach((button) => {
+      button.addEventListener("click", () => addFoodToMeal(button.dataset.meal));
+    });
+
+    clearDayBtn.addEventListener("click", clearDay);
+    calculateGoalBtn.addEventListener("click", calculateGoal);
+
+    [pesoInput, alturaInput, idadeInput].forEach((input) => {
+      input.addEventListener("input", calculateIMC);
+    });
+  </script>
+</body>
+</html>
